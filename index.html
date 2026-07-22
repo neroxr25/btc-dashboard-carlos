@@ -172,11 +172,11 @@
 
 <script>
     const paresConfig = {
-        'BTC': { ticker: 'BINANCE:BTCUSDT', label: 'BTC/USDT' },
-        'NQ1': { ticker: 'US100', label: 'NQ1/USD' },
-        'CL1': { ticker: 'USOIL', label: 'CL1/USD' },
-        'GL1': { ticker: 'GOLD', label: 'GL1/USD' },
-        'YM1': { ticker: 'US30', label: 'YM1/USD' }
+        'BTC': { ticker: 'BINANCE:BTCUSDT', label: 'BTC/USDT', screener: 'crypto' },
+        'NQ1': { ticker: 'CAPITALCOM:US100', label: 'NQ1/USD', screener: 'america' },
+        'CL1': { ticker: 'TVC:USOIL', label: 'CL1/USD', screener: 'america' },
+        'GL1': { ticker: 'TVC:GOLD', label: 'GL1/USD', screener: 'america' },
+        'YM1': { ticker: 'CAPITALCOM:US30', label: 'YM1/USD', screener: 'america' }
     };
 
     let parActual = 'BTC';
@@ -189,7 +189,12 @@
             parActual = e.target.getAttribute('data-par');
             
             document.getElementById('th-parametro').innerText = `Parámetro Operativo (${paresConfig[parActual].label})`;
-            document.getElementById('last-update').innerText = 'Cambiando par... actualizando datos...';
+            document.getElementById('last-update').innerText = `Cargando datos de ${paresConfig[parActual].label}...`;
+            
+            // Limpieza de estado al cambiar de tab
+            document.getElementById('tabla-cuerpo').innerHTML = '';
+            document.getElementById('ema-bloque1').innerHTML = '';
+            document.getElementById('ema-bloque2').innerHTML = '';
             
             cargarTradingViewData();
         });
@@ -209,7 +214,7 @@
             };
 
             // TradingView Scanner API allows any origin usually with text/plain to avoid CORS preflight issues
-            const response = await fetch('https://scanner.tradingview.com/global/scan', {
+            const response = await fetch(`https://scanner.tradingview.com/${config.screener}/scan`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain'
@@ -353,6 +358,9 @@
         } catch (error) {
             console.error('Error cargando datos de TradingView:', error);
             document.getElementById('last-update').innerText = 'Error al actualizar los datos. Reintentando...';
+            document.getElementById('tabla-cuerpo').innerHTML = '';
+            document.getElementById('ema-bloque1').innerHTML = '';
+            document.getElementById('ema-bloque2').innerHTML = '';
         }
     }
 
