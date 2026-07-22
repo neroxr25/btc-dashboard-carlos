@@ -28,8 +28,6 @@
         .negative { color: #9C0006; font-weight: bold; }
         .spacer-row { height: 25px; background-color: transparent; }
         .spacer-row td { border: none; }
-        
-        #tv-widget-fallback { width: 100%; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
@@ -50,13 +48,13 @@
         <span id="last-update-text">Cargando datos...</span>
     </div>
 
-    <!-- Contenedores de Tablas Custom -->
+    <!-- Contenedores de Tablas Custom Restauradas -->
     <div class="flex-container" id="custom-tables-container">
         <div class="main-table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th id="th-parametro">Parámetro Operativo</th>
+                        <th id="th-parametro">Parámetro Operativo (BTC/USDT)</th>
                         <th>Fecha / Hora</th>
                         <th>Valor Extraído</th>
                         <th>Dia Previo</th>
@@ -72,24 +70,21 @@
             <table><tbody id="ema-bloque2"></tbody></table>
         </div>
     </div>
-    
-    <!-- Contenedor Fallback Widget de TradingView -->
-    <div id="tv-widget-fallback" class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget" id="tv-widget-inner"></div>
-    </div>
 </div>
 
 <script>
+    // Configuración con Símbolos de TV y parámetros de Backend Simulado
     const paresConfig = {
-        'BTC': { ticker: 'BINANCE:BTCUSDT', label: 'BTC/USDT', screener: 'crypto' },
-        'NQ1': { ticker: 'CAPITALCOM:US100', label: 'NQ1/USD', screener: 'america' },
-        'CL1': { ticker: 'CAPITALCOM:OIL_CRUDE', label: 'CL1/USD', screener: 'america' },
-        'GL1': { ticker: 'TVC:GOLD', label: 'GL1/USD', screener: 'america' },
-        'YM1': { ticker: 'CAPITALCOM:US30', label: 'YM1/USD', screener: 'america' }
+        'BTC': { tvSymbol: 'BINANCE:BTCUSDT', label: 'BTC/USDT', backend: 'binance', fetchSymbol: 'BTCUSDT' },
+        'NQ1': { tvSymbol: 'CAPITALCOM:US100', label: 'NQ1/USD', backend: 'yahoo', fetchSymbol: 'NQ=F' },
+        'CL1': { tvSymbol: 'CAPITALCOM:OIL_CRUDE', label: 'CL1/USD', backend: 'yahoo', fetchSymbol: 'CL=F' },
+        'GL1': { tvSymbol: 'TVC:GOLD', label: 'GL1/USD', backend: 'yahoo', fetchSymbol: 'GC=F' },
+        'YM1': { tvSymbol: 'CAPITALCOM:US30', label: 'YM1/USD', backend: 'yahoo', fetchSymbol: 'YM=F' }
     };
 
     let parActual = 'BTC';
 
+    // Manejo de Interfaz de Navegación
     document.querySelectorAll('.btn-par').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.btn-par').forEach(b => b.classList.remove('active'));
@@ -97,37 +92,169 @@
             parActual = e.target.getAttribute('data-par');
             
             limpiarVista();
-            cargarTradingViewData();
+            cargarYCalcularDatos();
         });
     });
 
     function limpiarVista() {
         const config = paresConfig[parActual];
         document.getElementById('th-parametro').innerText = `Parámetro Operativo (${config.label})`;
-        document.getElementById('last-update-text').innerText = `Cargando datos de ${config.label}...`;
+        document.getElementById('last-update-text').innerText = `Extrayendo datos de ${config.tvSymbol}...`;
         document.getElementById('spinner').style.display = 'block';
         
-        // Limpiar tabla custom
+        // Limpiar tabla custom para forzar recarga visual
         document.getElementById('tabla-cuerpo').innerHTML = '';
         document.getElementById('ema-bloque1').innerHTML = '';
         document.getElementById('ema-bloque2').innerHTML = '';
-        
-        // Limpiar widget
-        document.getElementById('tv-widget-inner').innerHTML = '';
     }
 
-    function renderizarTabla(d, config) {
-        // Mostrar tablas custom, ocultar widget fallback
-        document.getElementById('custom-tables-container').style.display = 'flex';
-        document.getElementById('tv-widget-fallback').style.display = 'none';
+    // Backend Simulado: Extrae +200 velas de 1H en formato OHLC numérico puro sin bloqueos CORS
+    async function backendSimuladoTradingView(config) {
+        let ohlcData = [];
+        try {
+            if (config.backend === 'binance') {
+                const url = `https://api.binance.com/api/v3/klines?symbol=${config.fetchSymbol}&interval=1h&limit=250`;
+                const res = await fetch(url);
+                const data = await res.json();
+                ohlcData = data.map(d => ({
+                    open: parseFloat(d[1]), high: parseFloat(d[2]), low: parseFloat(d[3]), close: parseFloat(d[4])
+                }));
+            } else {
+                // Utiliza Proxy AllOrigins para sortear el bloqueo de CORS y extraer históricos
+                const proxyUrl = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${config.fetchSymbol}?interval=1h&range=14d`);
+                const res = await fetch(`https://api.allorigins.win/raw?url=${proxyUrl}`);
+                const data = await res.json();
+                
+                // Extraer el JSON real si AllOrigins lo anida (sucede ocasionalmente)
+                const chartData = data.contents ? JSON.parse(data.contents).chart.result[0] : data.chart.result[0];
+                const quotes = chartData.indicators.quote[0];
+                
+                for(let i = 0; i < quotes.close.length; i++) {
+                    if (quotes.close[i] !== null && quotes.close[i] !== undefined) {
+                        ohlcData.push({
+                            open: quotes.open[i],
+                            high: quotes.high[i],
+                            low: quotes.low[i],
+                            close: quotes.close[i]
+                        });
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error en Backend Simulado:", error);
+            throw new Error("Fallo al extraer histórico OHLC");
+        }
+        return ohlcData;
+    }
 
-        const hoyOpen = d[0] || 0; const hoyHigh = d[1] || 0; const hoyLow = d[2] || 0; const hoyClose = d[3] || 0;
-        const hoyEMA20 = d[4] || 0; const hoyEMA50 = d[5] || 0; const hoyEMA200 = d[6] || 0;
-        const hoyBBup = d[7] || 0; const hoyBBlow = d[8] || 0; const hoySAR = d[9] || 0;
+    // --- FUNCIONES MATEMÁTICAS INTERNAS (Cálculo Numérico Puro) ---
+    function calcularEMA(data, period) {
+        let result = new Array(data.length).fill(null);
+        if(data.length < period) return result;
+        let k = 2 / (period + 1);
+        let sma = 0;
+        for(let i = 0; i < period; i++) sma += data[i];
+        sma = sma / period;
+        result[period - 1] = sma;
+        for(let i = period; i < data.length; i++) {
+            result[i] = (data[i] * k) + (result[i-1] * (1 - k));
+        }
+        return result;
+    }
 
-        const ayerOpen = d[10] || 0; const ayerHigh = d[11] || 0; const ayerLow = d[12] || 0; const ayerClose = d[13] || 0;
-        const ayerEMA20 = d[14] || 0; const ayerEMA50 = d[15] || 0; const ayerEMA200 = d[16] || 0;
-        const ayerBBup = d[17] || 0; const ayerBBlow = d[18] || 0; const ayerSAR = d[19] || 0;
+    function calcularBollingerBands(data, period, multiplier) {
+        let result = new Array(data.length).fill({upper: null, lower: null});
+        if(data.length < period) return result;
+        for(let i = period - 1; i < data.length; i++) {
+            let slice = data.slice(i - period + 1, i + 1);
+            let sma = slice.reduce((a,b) => a+b, 0) / period;
+            let variance = slice.reduce((a,b) => a + Math.pow(b - sma, 2), 0) / period;
+            let stdDev = Math.sqrt(variance);
+            result[i] = { upper: sma + (multiplier * stdDev), lower: sma - (multiplier * stdDev) };
+        }
+        return result;
+    }
+
+    function calcularParabolicSAR(highs, lows, closes) {
+        let sar = new Array(closes.length).fill(null);
+        if(closes.length < 2) return sar;
+        let isLong = true;
+        let afStep = 0.02, afMax = 0.2;
+        let ep = highs[0];
+        sar[0] = lows[0];
+        let af = afStep;
+        
+        for (let i = 1; i < closes.length; i++) {
+            let prevSar = sar[i-1];
+            if (isLong) {
+                let nextSar = prevSar + af * (ep - prevSar);
+                nextSar = Math.min(nextSar, lows[i-1], i>1 ? lows[i-2] : lows[i-1]);
+                sar[i] = nextSar;
+                if (lows[i] < nextSar) {
+                    isLong = false;
+                    sar[i] = ep;
+                    ep = lows[i];
+                    af = afStep;
+                } else {
+                    if (highs[i] > ep) {
+                        ep = highs[i];
+                        af = Math.min(af + afStep, afMax);
+                    }
+                }
+            } else {
+                let nextSar = prevSar + af * (ep - prevSar);
+                nextSar = Math.max(nextSar, highs[i-1], i>1 ? highs[i-2] : highs[i-1]);
+                sar[i] = nextSar;
+                if (highs[i] > nextSar) {
+                    isLong = true;
+                    sar[i] = ep;
+                    ep = highs[i];
+                    af = afStep;
+                } else {
+                    if (lows[i] < ep) {
+                        ep = lows[i];
+                        af = Math.min(af + afStep, afMax);
+                    }
+                }
+            }
+        }
+        return sar;
+    }
+    // --------------------------------------------------------------
+
+    // Procesamiento y Volcado de Datos a Tabla
+    function poblarTablasHTML(ohlc, config) {
+        if(ohlc.length < 200) {
+            console.warn("Advertencia: Menos de 200 velas recibidas. Las EMA largas pueden no ser precisas.");
+        }
+
+        const closes = ohlc.map(d => d.close);
+        const highs = ohlc.map(d => d.high);
+        const lows = ohlc.map(d => d.low);
+        const opens = ohlc.map(d => d.open);
+
+        // Invocando Cálculos
+        const ema20 = calcularEMA(closes, 20);
+        const ema50 = calcularEMA(closes, 50);
+        const ema200 = calcularEMA(closes, 200);
+        const bb = calcularBollingerBands(closes, 20, 2);
+        const sar = calcularParabolicSAR(highs, lows, closes);
+
+        // Identificar periodos actuales y anteriores (aprox. ayer)
+        const idxHoy = closes.length - 1;
+        const idxAyer = Math.max(0, closes.length - 25);
+
+        // Variables de tabla para Hoy
+        const hoyOpen = opens[idxHoy] || 0; const hoyHigh = highs[idxHoy] || 0; 
+        const hoyLow = lows[idxHoy] || 0; const hoyClose = closes[idxHoy] || 0;
+        const hoyEMA20 = ema20[idxHoy] || 0; const hoyEMA50 = ema50[idxHoy] || 0; const hoyEMA200 = ema200[idxHoy] || 0;
+        const hoyBBup = bb[idxHoy].upper || 0; const hoyBBlow = bb[idxHoy].lower || 0; const hoySAR = sar[idxHoy] || 0;
+
+        // Variables de tabla para Ayer
+        const ayerOpen = opens[idxAyer] || 0; const ayerHigh = highs[idxAyer] || 0; 
+        const ayerLow = lows[idxAyer] || 0; const ayerClose = closes[idxAyer] || 0;
+        const ayerEMA20 = ema20[idxAyer] || 0; const ayerEMA50 = ema50[idxAyer] || 0; const ayerEMA200 = ema200[idxAyer] || 0;
+        const ayerBBup = bb[idxAyer].upper || 0; const ayerBBlow = bb[idxAyer].lower || 0; const ayerSAR = sar[idxAyer] || 0;
 
         const hoy = new Date();
         const diaHoy = hoy.getDate().toString().padStart(2, '0');
@@ -135,6 +262,7 @@
         ayer.setDate(hoy.getDate() - 1);
         const diaAyer = ayer.getDate().toString().padStart(2, '0');
 
+        // Formato para los números puros
         const fmt = (val) => (val || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const fmtDiff = (val) => val < 0 ? `<span class="negative">(${fmt(Math.abs(val))})</span>` : fmt(val);
 
@@ -192,6 +320,7 @@
         }
         document.getElementById('tabla-cuerpo').innerHTML = html;
 
+        // Rellenar las tablas secundarias (Ordenamiento de EMAs)
         const emasHoy = [
             { nombre: "EMA 20", valor: hoyEMA20 },
             { nombre: "EMA 50", valor: hoyEMA50 },
@@ -212,95 +341,36 @@
             <tr><th>${e.nombre}</th><td class="num-cell">${fmt(e.valor)}</td></tr>
         `).join('');
         
-        finalizarCarga(config.label);
-    }
-
-    function inyectarWidgetTradingView(config) {
-        console.log("Activando Fallback Widget TradingView para", config.ticker);
-        
-        // Ocultar tablas custom y mostrar contenedor de widget
-        document.getElementById('custom-tables-container').style.display = 'none';
-        const widgetContainer = document.getElementById('tv-widget-fallback');
-        widgetContainer.style.display = 'block';
-        
-        const innerContainer = document.getElementById('tv-widget-inner');
-        innerContainer.innerHTML = '';
-        
-        // Crear e inyectar el script del widget técnico
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
-        script.async = true;
-        
-        script.innerHTML = JSON.stringify({
-            "interval": "1h",
-            "width": "100%",
-            "isTransparent": false,
-            "height": "500",
-            "symbol": config.ticker,
-            "showIntervalTabs": true,
-            "displayMode": "multiple",
-            "locale": "es",
-            "colorTheme": "light"
-        });
-        
-        innerContainer.appendChild(script);
-        finalizarCarga(`${config.label} (Modo Widget TV)`);
-    }
-
-    function finalizarCarga(labelText) {
+        // Finalizar estado UI
         const now = new Date();
         document.getElementById('spinner').style.display = 'none';
-        document.getElementById('last-update-text').innerText = `Última actualización: ${now.toLocaleTimeString()} - Par: ${labelText}`;
+        document.getElementById('last-update-text').innerText = `Última actualización: ${now.toLocaleTimeString()} - Par: ${config.label}`;
     }
 
-    async function cargarTradingViewData() {
+    async function cargarYCalcularDatos() {
         const config = paresConfig[parActual];
-        
         try {
-            const queryBody = {
-                "symbols": { "tickers": [config.ticker] },
-                "columns": [
-                    "open", "high", "low", "close", "EMA20", "EMA50", "EMA200", "BB.upper", "BB.lower", "P.SAR",
-                    "open[1]", "high[1]", "low[1]", "close[1]", "EMA20[1]", "EMA50[1]", "EMA200[1]", "BB.upper[1]", "BB.lower[1]", "P.SAR[1]"
-                ]
-            };
+            // Fase 1: Extracción Pura (OHLC 200 velas 1H)
+            const ohlcHistorico = await backendSimuladoTradingView(config);
             
-            const tvRes = await fetch(`https://scanner.tradingview.com/${config.screener}/scan`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(queryBody)
-            });
-            
-            if (tvRes.ok) {
-                const tvData = await tvRes.json();
-                if (tvData.data && tvData.data.length > 0 && tvData.data[0].d[0] !== null) {
-                    renderizarTabla(tvData.data[0].d, config);
-                    return; // Éxito con HTTP directo
-                }
-            }
-            
-            // Si llega aquí, la respuesta fue HTTP OK pero vacía (bloqueo/CORS/symbol no encontrado en scanner) o tvRes no ok
-            throw new Error("Respuesta del scanner vacía o bloqueada");
-            
+            // Fase 2: Cálculo Matemático y Volcado Visual a Tabla HTML
+            poblarTablasHTML(ohlcHistorico, config);
+
         } catch (error) {
-            console.warn('TV Scanner Fetch falló, conmutando a Widget TV directo:', error);
-            // Fallback: Inyectar widget de TradingView 100% nativo
-            inyectarWidgetTradingView(config);
+            console.error('Fallo en la cadena de datos:', error);
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('last-update-text').innerText = 'Error al actualizar los datos.';
         }
     }
 
-    // Carga inicial
+    // Inicialización del script
     limpiarVista();
-    cargarTradingViewData();
+    cargarYCalcularDatos();
     
-    // Actualización automática cada 60 segundos
+    // Bucle de Actualización (cada 60 segundos exactos)
     setInterval(() => {
-        // Solo recargar la tabla custom si está en uso. Si el widget está activo, este se actualiza solo en tiempo real.
-        if (document.getElementById('tv-widget-fallback').style.display !== 'block') {
-            limpiarVista();
-            cargarTradingViewData();
-        }
+        limpiarVista();
+        cargarYCalcularDatos();
     }, 60000);
 </script>
 
