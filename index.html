@@ -5,121 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paso a Paso para ser millonarios</title>
     <style>
-        body {
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 1150px;
-            margin: auto;
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .header-title {
-            text-align: center;
-            font-size: 26px;
-            font-weight: bold;
-            margin-bottom: 25px;
-            color: #1a1a1a;
-            text-transform: uppercase;
-        }
-        .menu-pares {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .btn-par {
-            padding: 10px 18px;
-            background-color: #e0e0e0;
-            color: #333;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .btn-par.active {
-            background-color: #1a73e8;
-            color: white;
-            box-shadow: 0 2px 6px rgba(26,115,232,0.4);
-        }
-        .btn-par:hover {
-            background-color: #d5d5d5;
-        }
-        .btn-par.active:hover {
-            background-color: #1557b0;
-        }
-        .last-update {
-            text-align: center;
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 20px;
-            font-style: italic;
-        }
-        .flex-container {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-        .main-table-wrap {
-            flex: 3;
-            overflow-x: auto;
-        }
-        .side-tables-wrap {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 180px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13.5px;
-        }
-        th, td {
-            border: 1px solid #d9d9d9;
-            padding: 6px 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #EAEAEA;
-            font-weight: bold;
-            text-align: center;
-            color: #000;
-        }
-        .date-cell {
-            text-align: center;
-            color: #9C0006;
-            font-weight: bold;
-        }
-        .val-green {
-            background-color: #E2EFDA;
-            text-align: right;
-            font-weight: bold;
-        }
-        .num-cell {
-            text-align: right;
-        }
-        .negative {
-            color: #9C0006;
-            font-weight: bold;
-        }
-        .spacer-row {
-            height: 25px;
-            background-color: transparent;
-        }
-        .spacer-row td {
-            border: none;
-        }
+        body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1150px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .header-title { text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 25px; color: #1a1a1a; text-transform: uppercase; }
+        .menu-pares { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+        .btn-par { padding: 10px 18px; background-color: #e0e0e0; color: #333; border: none; border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-par.active { background-color: #1a73e8; color: white; box-shadow: 0 2px 6px rgba(26,115,232,0.4); }
+        .btn-par:hover { background-color: #d5d5d5; }
+        .btn-par.active:hover { background-color: #1557b0; }
+        .last-update { text-align: center; font-size: 13px; color: #555; margin-bottom: 20px; font-style: italic; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .spinner { border: 2px solid #f3f3f3; border-top: 2px solid #1a73e8; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .flex-container { display: flex; gap: 20px; align-items: flex-start; }
+        .main-table-wrap { flex: 3; overflow-x: auto; }
+        .side-tables-wrap { flex: 1; display: flex; flex-direction: column; gap: 180px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+        th, td { border: 1px solid #d9d9d9; padding: 6px 10px; text-align: left; }
+        th { background-color: #EAEAEA; font-weight: bold; text-align: center; color: #000; }
+        .date-cell { text-align: center; color: #9C0006; font-weight: bold; }
+        .val-green { background-color: #E2EFDA; text-align: right; font-weight: bold; }
+        .num-cell { text-align: right; }
+        .negative { color: #9C0006; font-weight: bold; }
+        .spacer-row { height: 25px; background-color: transparent; }
+        .spacer-row td { border: none; }
     </style>
 </head>
 <body>
@@ -127,7 +35,6 @@
 <div class="container">
     <div class="header-title">Paso a Paso para ser millonarios</div>
     
-    <!-- Botones de Pares -->
     <div class="menu-pares" id="menu-pares">
         <button class="btn-par active" data-par="BTC">BTC/USDT</button>
         <button class="btn-par" data-par="NQ1">NQ1/USD</button>
@@ -136,15 +43,17 @@
         <button class="btn-par" data-par="YM1">YM1/USD</button>
     </div>
 
-    <div id="last-update" class="last-update">Actualizando datos...</div>
+    <div class="last-update">
+        <div id="spinner" class="spinner"></div>
+        <span id="last-update">Cargando datos...</span>
+    </div>
 
     <div class="flex-container">
-        <!-- Tabla Principal -->
         <div class="main-table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th id="th-parametro">Parámetro Operativo (BTC)</th>
+                        <th id="th-parametro">Parámetro Operativo (BTC/USDT)</th>
                         <th>Fecha / Hora</th>
                         <th>Valor Extraído</th>
                         <th>Dia Previo</th>
@@ -152,36 +61,27 @@
                         <th>Diferencias</th>
                     </tr>
                 </thead>
-                <tbody id="tabla-cuerpo">
-                    <!-- Filas inyectadas dinámicamente -->
-                </tbody>
+                <tbody id="tabla-cuerpo"></tbody>
             </table>
         </div>
-
-        <!-- Minitablas Laterales de EMAs -->
         <div class="side-tables-wrap">
-            <table>
-                <tbody id="ema-bloque1"></tbody>
-            </table>
-            <table>
-                <tbody id="ema-bloque2"></tbody>
-            </table>
+            <table><tbody id="ema-bloque1"></tbody></table>
+            <table><tbody id="ema-bloque2"></tbody></table>
         </div>
     </div>
 </div>
 
 <script>
     const paresConfig = {
-        'BTC': { ticker: 'BINANCE:BTCUSDT', label: 'BTC/USDT', screener: 'crypto' },
-        'NQ1': { ticker: 'CAPITALCOM:US100', label: 'NQ1/USD', screener: 'america' },
-        'CL1': { ticker: 'TVC:USOIL', label: 'CL1/USD', screener: 'america' },
-        'GL1': { ticker: 'TVC:GOLD', label: 'GL1/USD', screener: 'america' },
-        'YM1': { ticker: 'CAPITALCOM:US30', label: 'YM1/USD', screener: 'america' }
+        'BTC': { ticker: 'BINANCE:BTCUSDT', label: 'BTC/USDT', screener: 'crypto', fallbackApi: 'binance', symbolBinance: 'BTCUSDT' },
+        'NQ1': { ticker: 'CAPITALCOM:US100', label: 'NQ1/USD', screener: 'america', fallbackApi: 'yahoo', symbolYahoo: 'NQ=F' },
+        'CL1': { ticker: 'TVC:USOIL', label: 'CL1/USD', screener: 'america', fallbackApi: 'yahoo', symbolYahoo: 'CL=F' },
+        'GL1': { ticker: 'TVC:GOLD', label: 'GL1/USD', screener: 'america', fallbackApi: 'yahoo', symbolYahoo: 'GC=F' },
+        'YM1': { ticker: 'CAPITALCOM:US30', label: 'YM1/USD', screener: 'america', fallbackApi: 'yahoo', symbolYahoo: 'YM=F' }
     };
 
     let parActual = 'BTC';
 
-    // Manejo de botones
     document.querySelectorAll('.btn-par').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.btn-par').forEach(b => b.classList.remove('active'));
@@ -190,8 +90,8 @@
             
             document.getElementById('th-parametro').innerText = `Parámetro Operativo (${paresConfig[parActual].label})`;
             document.getElementById('last-update').innerText = `Cargando datos de ${paresConfig[parActual].label}...`;
+            document.getElementById('spinner').style.display = 'block';
             
-            // Limpieza de estado al cambiar de tab
             document.getElementById('tabla-cuerpo').innerHTML = '';
             document.getElementById('ema-bloque1').innerHTML = '';
             document.getElementById('ema-bloque2').innerHTML = '';
@@ -200,167 +100,269 @@
         });
     });
 
+    // Helper: Calculation functions for fallback data
+    function calculateEMA(data, period) {
+        let result = new Array(data.length).fill(null);
+        if(data.length < period) return result;
+        let k = 2 / (period + 1);
+        let sma = 0;
+        for(let i = 0; i < period; i++) sma += data[i];
+        sma = sma / period;
+        result[period - 1] = sma;
+        for(let i = period; i < data.length; i++) {
+            result[i] = (data[i] * k) + (result[i-1] * (1 - k));
+        }
+        return result;
+    }
+
+    function calculateBB(data, period, multiplier) {
+        let result = new Array(data.length).fill({upper: null, lower: null});
+        if(data.length < period) return result;
+        for(let i = period - 1; i < data.length; i++) {
+            let slice = data.slice(i - period + 1, i + 1);
+            let sma = slice.reduce((a,b) => a+b, 0) / period;
+            let variance = slice.reduce((a,b) => a + Math.pow(b - sma, 2), 0) / period;
+            let stdDev = Math.sqrt(variance);
+            result[i] = { upper: sma + (multiplier * stdDev), lower: sma - (multiplier * stdDev) };
+        }
+        return result;
+    }
+
+    function calculateSAR(highs, lows, closes) {
+        let sar = new Array(closes.length).fill(null);
+        if(closes.length < 2) return sar;
+        let isLong = true;
+        let afStep = 0.02, afMax = 0.2;
+        let ep = highs[0];
+        sar[0] = lows[0];
+        let af = afStep;
+        
+        for (let i = 1; i < closes.length; i++) {
+            let prevSar = sar[i-1];
+            if (isLong) {
+                let nextSar = prevSar + af * (ep - prevSar);
+                nextSar = Math.min(nextSar, lows[i-1], i>1 ? lows[i-2] : lows[i-1]);
+                sar[i] = nextSar;
+                if (lows[i] < nextSar) {
+                    isLong = false;
+                    sar[i] = ep;
+                    ep = lows[i];
+                    af = afStep;
+                } else {
+                    if (highs[i] > ep) {
+                        ep = highs[i];
+                        af = Math.min(af + afStep, afMax);
+                    }
+                }
+            } else {
+                let nextSar = prevSar + af * (ep - prevSar);
+                nextSar = Math.max(nextSar, highs[i-1], i>1 ? highs[i-2] : highs[i-1]);
+                sar[i] = nextSar;
+                if (highs[i] > nextSar) {
+                    isLong = true;
+                    sar[i] = ep;
+                    ep = highs[i];
+                    af = afStep;
+                } else {
+                    if (lows[i] < ep) {
+                        ep = lows[i];
+                        af = Math.min(af + afStep, afMax);
+                    }
+                }
+            }
+        }
+        return sar;
+    }
+
+    function processOHLCAndRender(ohlc, config) {
+        if(ohlc.length < 2) throw new Error("Not enough data from fallback");
+        const closes = ohlc.map(d => d.close);
+        const highs = ohlc.map(d => d.high);
+        const lows = ohlc.map(d => d.low);
+        const opens = ohlc.map(d => d.open);
+
+        const ema20 = calculateEMA(closes, 20);
+        const ema50 = calculateEMA(closes, 50);
+        const ema200 = calculateEMA(closes, 200);
+        const bb = calculateBB(closes, 20, 2);
+        const sar = calculateSAR(highs, lows, closes);
+
+        const idxHoy = closes.length - 1;
+        const idxAyer = Math.max(0, closes.length - 25); // Approx 24 hours ago in 1H timeframe
+
+        const d = [
+            opens[idxHoy], highs[idxHoy], lows[idxHoy], closes[idxHoy],
+            ema20[idxHoy], ema50[idxHoy], ema200[idxHoy], bb[idxHoy].upper, bb[idxHoy].lower, sar[idxHoy],
+            opens[idxAyer], highs[idxAyer], lows[idxAyer], closes[idxAyer],
+            ema20[idxAyer], ema50[idxAyer], ema200[idxAyer], bb[idxAyer].upper, bb[idxAyer].lower, sar[idxAyer]
+        ];
+
+        renderizarTabla(d, config);
+    }
+
+    function renderizarTabla(d, config) {
+        const hoyOpen = d[0] || 0; const hoyHigh = d[1] || 0; const hoyLow = d[2] || 0; const hoyClose = d[3] || 0;
+        const hoyEMA20 = d[4] || 0; const hoyEMA50 = d[5] || 0; const hoyEMA200 = d[6] || 0;
+        const hoyBBup = d[7] || 0; const hoyBBlow = d[8] || 0; const hoySAR = d[9] || 0;
+
+        const ayerOpen = d[10] || 0; const ayerHigh = d[11] || 0; const ayerLow = d[12] || 0; const ayerClose = d[13] || 0;
+        const ayerEMA20 = d[14] || 0; const ayerEMA50 = d[15] || 0; const ayerEMA200 = d[16] || 0;
+        const ayerBBup = d[17] || 0; const ayerBBlow = d[18] || 0; const ayerSAR = d[19] || 0;
+
+        const hoy = new Date();
+        const diaHoy = hoy.getDate().toString().padStart(2, '0');
+        const ayer = new Date();
+        ayer.setDate(hoy.getDate() - 1);
+        const diaAyer = ayer.getDate().toString().padStart(2, '0');
+
+        const fmt = (val) => (val || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const fmtDiff = (val) => val < 0 ? `<span class="negative">(${fmt(Math.abs(val))})</span>` : fmt(val);
+
+        const bloque1 = [
+            ["Apertura Pre-Market", `${diaHoy} 04:00`, hoyOpen],
+            ["Mínimo Estructural PM", `${diaHoy} 08:00`, hoyLow],
+            ["Máximo Estructural PM", `${diaHoy} 06:00`, hoyHigh],
+            ["Apertura Oficial (Open)", `${diaHoy} 09:00`, hoyOpen],
+            ["EMA 20", `${diaHoy} 09:00`, hoyEMA20],
+            ["EMA 50", `${diaHoy} 09:00`, hoyEMA50],
+            ["EMA 200", `${diaHoy} 09:00`, hoyEMA200],
+            ["Banda Bollinger Superior (Top)", `${diaHoy} 09:00`, hoyBBup],
+            ["Banda Bollinger Inferior (Bottom)", `${diaHoy} 09:00`, hoyBBlow],
+            ["Parabolic SAR", `${diaHoy} 9:00`, hoySAR]
+        ];
+
+        const bloque2 = [
+            ["Cierre Post-Market", `${diaAyer} 20:00`, ayerClose],
+            ["Cierre Oficial", `${diaAyer} 16:00`, ayerClose],
+            ["Mínimo Estructural Oficial", `${diaAyer} 09:00 - 16:00`, ayerLow],
+            ["Máximo Estructural Oficial", `${diaAyer} 9:00 - 16:00`, ayerHigh],
+            ["Apertura Oficial", `${diaAyer} 09:00`, ayerOpen],
+            ["EMA 20", `${diaAyer} 16:00`, ayerEMA20],
+            ["EMA 50", `${diaAyer} 16:00`, ayerEMA50],
+            ["EMA 200", `${diaAyer} 16:00`, ayerEMA200],
+            ["Banda Bollinger Superior (Top)", `${diaAyer} 16:00`, ayerBBup],
+            ["Banda Bollinger Inferior (Bottom)", `${diaAyer} 16:00`, ayerBBlow],
+            ["Parabolic SAR", `${diaAyer} 16:00`, ayerSAR]
+        ];
+
+        let html = '';
+        for (let i = 0; i < bloque1.length; i++) {
+            const valHoy = bloque1[i][2];
+            const valAyer = bloque2[i][2] || 0;
+            const diff = valHoy - valAyer;
+            html += `<tr>
+                <td>${bloque1[i][0]}</td>
+                <td class="date-cell">${bloque1[i][1]}</td>
+                <td class="val-green">${fmt(valHoy)}</td>
+                <td class="num-cell">${fmt(valAyer)}</td>
+                <td class="num-cell">${fmtDiff(diff)}</td>
+                <td></td>
+            </tr>`;
+        }
+        html += `<tr class="spacer-row"><td colspan="6"></td></tr>`;
+        for (let i = 0; i < bloque2.length; i++) {
+            html += `<tr>
+                <td>${bloque2[i][0]}</td>
+                <td class="date-cell">${bloque2[i][1]}</td>
+                <td class="val-green">${fmt(bloque2[i][2])}</td>
+                <td class="num-cell">-</td>
+                <td class="num-cell">-</td>
+                <td></td>
+            </tr>`;
+        }
+        document.getElementById('tabla-cuerpo').innerHTML = html;
+
+        const emasHoy = [
+            { nombre: "EMA 20", valor: hoyEMA20 },
+            { nombre: "EMA 50", valor: hoyEMA50 },
+            { nombre: "EMA 200", valor: hoyEMA200 }
+        ].sort((a, b) => a.valor - b.valor);
+
+        const emasAyer = [
+            { nombre: "EMA 20", valor: ayerEMA20 },
+            { nombre: "EMA 50", valor: ayerEMA50 },
+            { nombre: "EMA 200", valor: ayerEMA200 }
+        ].sort((a, b) => a.valor - b.valor);
+
+        document.getElementById('ema-bloque1').innerHTML = emasHoy.map(e => `
+            <tr><th>${e.nombre}</th><td class="num-cell">${fmt(e.valor)}</td></tr>
+        `).join('');
+
+        document.getElementById('ema-bloque2').innerHTML = emasAyer.map(e => `
+            <tr><th>${e.nombre}</th><td class="num-cell">${fmt(e.valor)}</td></tr>
+        `).join('');
+        
+        const now = new Date();
+        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('last-update').innerText = `Última actualización: ${now.toLocaleTimeString()} - Par: ${config.label}`;
+    }
+
     async function cargarTradingViewData() {
+        const config = paresConfig[parActual];
+        let successTV = false;
+
+        document.getElementById('spinner').style.display = 'block';
+
         try {
-            const config = paresConfig[parActual];
             const queryBody = {
-                "symbols": {
-                    "tickers": [config.ticker]
-                },
+                "symbols": { "tickers": [config.ticker] },
                 "columns": [
                     "open", "high", "low", "close", "EMA20", "EMA50", "EMA200", "BB.upper", "BB.lower", "P.SAR",
                     "open[1]", "high[1]", "low[1]", "close[1]", "EMA20[1]", "EMA50[1]", "EMA200[1]", "BB.upper[1]", "BB.lower[1]", "P.SAR[1]"
                 ]
             };
-
-            // TradingView Scanner API allows any origin usually with text/plain to avoid CORS preflight issues
-            const response = await fetch(`https://scanner.tradingview.com/${config.screener}/scan`, {
+            const tvRes = await fetch(`https://scanner.tradingview.com/${config.screener}/scan`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain'
-                },
+                headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify(queryBody)
             });
-
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            const result = await response.json();
-            if (!result.data || result.data.length === 0) throw new Error('No data returned');
-
-            const d = result.data[0].d;
-
-            // Variables Hoy
-            const hoyOpen = d[0] || 0;
-            const hoyHigh = d[1] || 0;
-            const hoyLow = d[2] || 0;
-            const hoyClose = d[3] || 0;
-            const hoyEMA20 = d[4] || 0;
-            const hoyEMA50 = d[5] || 0;
-            const hoyEMA200 = d[6] || 0;
-            const hoyBBup = d[7] || 0;
-            const hoyBBlow = d[8] || 0;
-            const hoySAR = d[9] || 0;
-
-            // Variables Ayer
-            const ayerOpen = d[10] || 0;
-            const ayerHigh = d[11] || 0;
-            const ayerLow = d[12] || 0;
-            const ayerClose = d[13] || 0;
-            const ayerEMA20 = d[14] || 0;
-            const ayerEMA50 = d[15] || 0;
-            const ayerEMA200 = d[16] || 0;
-            const ayerBBup = d[17] || 0;
-            const ayerBBlow = d[18] || 0;
-            const ayerSAR = d[19] || 0;
-
-            // Fechas dinámicas (Hoy y Ayer)
-            const hoy = new Date();
-            const diaHoy = hoy.getDate().toString().padStart(2, '0');
-            const ayer = new Date();
-            ayer.setDate(hoy.getDate() - 1);
-            const diaAyer = ayer.getDate().toString().padStart(2, '0');
-
-            // Formateadores numéricos adaptados al tipo de activo
-            // BTC/Indices suelen tener 2 decimales, Gold 2, Oil 2.
-            const fmt = (val) => (val || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const fmtDiff = (val) => val < 0 ? `<span class="negative">(${fmt(Math.abs(val))})</span>` : fmt(val);
-
-            // Estructura Bloque Hoy
-            const bloque1 = [
-                ["Apertura Pre-Market", `${diaHoy} 04:00`, hoyOpen],
-                ["Mínimo Estructural PM", `${diaHoy} 08:00`, hoyLow],
-                ["Máximo Estructural PM", `${diaHoy} 06:00`, hoyHigh],
-                ["Apertura Oficial (Open)", `${diaHoy} 09:00`, hoyOpen],
-                ["EMA 20", `${diaHoy} 09:00`, hoyEMA20],
-                ["EMA 50", `${diaHoy} 09:00`, hoyEMA50],
-                ["EMA 200", `${diaHoy} 09:00`, hoyEMA200],
-                ["Banda Bollinger Superior (Top)", `${diaHoy} 09:00`, hoyBBup],
-                ["Banda Bollinger Inferior (Bottom)", `${diaHoy} 09:00`, hoyBBlow],
-                ["Parabolic SAR", `${diaHoy} 9:00`, hoySAR]
-            ];
-
-            // Estructura Bloque Ayer
-            const bloque2 = [
-                ["Cierre Post-Market", `${diaAyer} 20:00`, ayerClose],
-                ["Cierre Oficial", `${diaAyer} 16:00`, ayerClose],
-                ["Mínimo Estructural Oficial", `${diaAyer} 09:00 - 16:00`, ayerLow],
-                ["Máximo Estructural Oficial", `${diaAyer} 9:00 - 16:00`, ayerHigh],
-                ["Apertura Oficial", `${diaAyer} 09:00`, ayerOpen],
-                ["EMA 20", `${diaAyer} 16:00`, ayerEMA20],
-                ["EMA 50", `${diaAyer} 16:00`, ayerEMA50],
-                ["EMA 200", `${diaAyer} 16:00`, ayerEMA200],
-                ["Banda Bollinger Superior (Top)", `${diaAyer} 16:00`, ayerBBup],
-                ["Banda Bollinger Inferior (Bottom)", `${diaAyer} 16:00`, ayerBBlow],
-                ["Parabolic SAR", `${diaAyer} 16:00`, ayerSAR]
-            ];
-
-            let html = '';
-
-            // Renderizar Bloque 1
-            for (let i = 0; i < bloque1.length; i++) {
-                const valHoy = bloque1[i][2];
-                const valAyer = bloque2[i][2] || 0;
-                const diff = valHoy - valAyer;
-
-                html += `<tr>
-                    <td>${bloque1[i][0]}</td>
-                    <td class="date-cell">${bloque1[i][1]}</td>
-                    <td class="val-green">${fmt(valHoy)}</td>
-                    <td class="num-cell">${fmt(valAyer)}</td>
-                    <td class="num-cell">${fmtDiff(diff)}</td>
-                    <td></td>
-                </tr>`;
+            if (tvRes.ok) {
+                const tvData = await tvRes.json();
+                if (tvData.data && tvData.data.length > 0 && tvData.data[0].d[0] !== null) {
+                    renderizarTabla(tvData.data[0].d, config);
+                    successTV = true;
+                }
             }
-
-            // Separador
-            html += `<tr class="spacer-row"><td colspan="6"></td></tr>`;
-
-            // Renderizar Bloque 2
-            for (let i = 0; i < bloque2.length; i++) {
-                html += `<tr>
-                    <td>${bloque2[i][0]}</td>
-                    <td class="date-cell">${bloque2[i][1]}</td>
-                    <td class="val-green">${fmt(bloque2[i][2])}</td>
-                    <td class="num-cell">-</td>
-                    <td class="num-cell">-</td>
-                    <td></td>
-                </tr>`;
-            }
-
-            document.getElementById('tabla-cuerpo').innerHTML = html;
-
-            // ORDENAR EMAs DE MENOR A MAYOR POR SU VALOR NUMÉRICO
-            const emasHoy = [
-                { nombre: "EMA 20", valor: hoyEMA20 },
-                { nombre: "EMA 50", valor: hoyEMA50 },
-                { nombre: "EMA 200", valor: hoyEMA200 }
-            ].sort((a, b) => a.valor - b.valor);
-
-            const emasAyer = [
-                { nombre: "EMA 20", valor: ayerEMA20 },
-                { nombre: "EMA 50", valor: ayerEMA50 },
-                { nombre: "EMA 200", valor: ayerEMA200 }
-            ].sort((a, b) => a.valor - b.valor);
-
-            // Renderizar Minitablas Laterales Ordenadas
-            document.getElementById('ema-bloque1').innerHTML = emasHoy.map(e => `
-                <tr><th>${e.nombre}</th><td class="num-cell">${fmt(e.valor)}</td></tr>
-            `).join('');
-
-            document.getElementById('ema-bloque2').innerHTML = emasAyer.map(e => `
-                <tr><th>${e.nombre}</th><td class="num-cell">${fmt(e.valor)}</td></tr>
-            `).join('');
-            
-            // Actualizar el indicador de la última actualización
-            const now = new Date();
-            document.getElementById('last-update').innerText = `Última actualización: ${now.toLocaleTimeString()} - Par: ${config.label}`;
-
         } catch (error) {
-            console.error('Error cargando datos de TradingView:', error);
-            document.getElementById('last-update').innerText = 'Error al actualizar los datos. Reintentando...';
-            document.getElementById('tabla-cuerpo').innerHTML = '';
-            document.getElementById('ema-bloque1').innerHTML = '';
-            document.getElementById('ema-bloque2').innerHTML = '';
+            console.warn('TV Scanner failed, trying fallback...', error);
+        }
+
+        if (!successTV) {
+            try {
+                if (config.fallbackApi === 'binance') {
+                    const binanceRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${config.symbolBinance}&interval=1h&limit=250`);
+                    const binanceData = await binanceRes.json();
+                    const ohlc = binanceData.map(d => ({
+                        open: parseFloat(d[1]), high: parseFloat(d[2]), low: parseFloat(d[3]), close: parseFloat(d[4])
+                    }));
+                    processOHLCAndRender(ohlc, config);
+                } else if (config.fallbackApi === 'yahoo') {
+                    // Use standard allorigins proxy to bypass CORS for Yahoo Finance
+                    const yfUrl = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${config.symbolYahoo}?interval=1h&range=14d`);
+                    const yfRes = await fetch(`https://api.allorigins.win/raw?url=${yfUrl}`);
+                    const yfData = await yfRes.json();
+                    const res = yfData.contents ? JSON.parse(yfData.contents).chart.result[0] : yfData.chart.result[0];
+                    const ohlc = [];
+                    for(let i = 0; i < res.indicators.quote[0].close.length; i++){
+                        if (res.indicators.quote[0].close[i] !== null && res.indicators.quote[0].close[i] !== undefined) {
+                            ohlc.push({
+                                open: res.indicators.quote[0].open[i],
+                                high: res.indicators.quote[0].high[i],
+                                low: res.indicators.quote[0].low[i],
+                                close: res.indicators.quote[0].close[i]
+                            });
+                        }
+                    }
+                    processOHLCAndRender(ohlc, config);
+                }
+            } catch (error) {
+                console.error('Fallback failed:', error);
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('last-update').innerText = 'Error al actualizar los datos.';
+                document.getElementById('tabla-cuerpo').innerHTML = '';
+                document.getElementById('ema-bloque1').innerHTML = '';
+                document.getElementById('ema-bloque2').innerHTML = '';
+            }
         }
     }
 
