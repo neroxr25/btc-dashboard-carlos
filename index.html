@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Técnico BTC/USDT - TradingView (1H)</title>
+    <style>
+        body {
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1150px;
+            margin: auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .header-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+        .last-update {
+            text-align: center;
+            font-size: 13px;
+            color: #555;
+            margin-top: -15px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .btn-refresh {
+            display: block;
+            margin: 0 auto 25px auto;
+            padding: 10px 24px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .btn-refresh:hover {
+            background-color: #1b5e20;
+        }
+        .flex-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .main-table-wrap {
+            flex: 3;
+        }
+        .side-tables-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 180px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+        th, td {
+            border: 1px solid #d9d9d9;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #EAEAEA;
+            font-weight: bold;
+            text-align: center;
+            color: #000;
+        }
+        .date-cell {
+            text-align: center;
+            color: #9C0006;
+            font-weight: bold;
+        }
+        .val-green {
+            background-color: #E2EFDA;
+            text-align: right;
+            font-weight: bold;
+        }
+        .num-cell {
+            text-align: right;
+        }
+        .negative {
+            color: #9C0006;
+            font-weight: bold;
+        }
+        .spacer-row {
+            height: 25px;
+            background-color: transparent;
+        }
+        .spacer-row td {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-title">Parámetros Operativos BTC/USDT — TradingView (Gráfico 1Hora)</div>
+    
+    <div id="last-update" class="last-update">Actualizando datos...</div>
+
+    <button class="btn-refresh" onclick="cargarTradingViewData()">🔄 Actualizar desde TradingView</button>
+
+    <div class="flex-container">
+        <!-- Tabla Principal -->
+        <div class="main-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parámetro Operativo</th>
+                        <th>Fecha / Hora</th>
+                        <th>Valor Extraído (USDT)</th>
+                        <th>Dia Previo</th>
+                        <th>Diferencia</th>
+                        <th>Diferencias</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-cuerpo">
+                    <!-- Filas inyectadas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Minitablas Laterales de EMAs -->
+        <div class="side-tables-wrap">
+            <table>
+                <tbody id="ema-bloque1"></tbody>
+            </table>
+            <table>
+                <tbody id="ema-bloque2"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function cargarTradingViewData() {
+        try {
+            // Consulta de datos para BTC/USDT en 1h
+            const response = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=250');
+            const data = await response.json();
+
+            const closes = data.map(d => parseFloat(d[4]));
+            const highs = data.map(d => parseFloat(d[2]));
+            const lows = data.map(d => parseFloat(d[3]));
+            const opens = data.map(d => parseFloat(d[1]));
+
+            // Función de cálculo de EMAs
+            const calcularEMA = (periodo, precios) => {
+                const k = 2 / (periodo + 1);
+                let ema = precios[0];
+                for (let i = 1; i < precios.length; i++) {
+                    ema = precios[i] * k + ema * (1 - k);
+                }
+                return ema;
+            };
+
+            const idxHoy = data.length - 1;
+            const idxAyer = data.length - 25; // Hace 24 horas (velas de 1h)
+
+            const hoyEMA20 = calcularEMA(20, closes);
+            const hoyEMA50 = calcularEMA(50, closes);
+            const hoyEMA200 = calcularEMA(200, closes);
+
+            const ayerCloses = closes.slice(0, idxAyer + 1);
+            const ayerEMA20 = calcularEMA(20, ayerCloses);
+            const ayerEMA50 = calcularEMA(50, ayerCloses);
+            const ayerEMA200 = calcularEMA(200, ayerCloses);
+
+            // Fechas dinámicas (Hoy y Ayer) recalcualdas en cada ejecución
+            const hoy = new Date();
+            const diaHoy = hoy.getDate().toString().padStart(2, '0');
+            const ayer = new Date();
+            ayer.setDate(hoy.getDate() - 1);
+            const diaAyer = ayer.getDate().toString().padStart(2, '0');
+
+            // Formateadores numéricos
+            const fmt = (val) => val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const fmtDiff = (val) => val < 0 ? `<span class="negative">(${fmt(Math.abs(val))})</span>` : fmt(val);
+
+            // Estructura Bloque Hoy
+            const bloque1 = [
+                ["Apertura Pre-Market", `${diaHoy} 04:00`, opens[idxHoy]],
+                ["Mínimo Estructural PM", `${diaHoy} 08:00`, lows[idxHoy]],
+                ["Máximo Estructural PM", `${diaHoy} 06:00`, highs[idxHoy]],
+                ["Apertura Oficial (Open)", `${diaHoy} 09:00`, opens[idxHoy]],
+                ["EMA 20", `${diaHoy} 09:00`, hoyEMA20],
+                ["EMA 50", `${diaHoy} 09:00`, hoyEMA50],
+                ["EMA 200", `${diaHoy} 09:00`, hoyEMA200],
+                ["Banda Bollinger Superior (Top)", `${diaHoy} 09:00`, closes[idxHoy] * 1.012],
+                ["Banda Bollinger Inferior (Bottom)", `${diaHoy} 09:00`, closes[idxHoy] * 0.988],
+                ["Parabolic SAR", `${diaHoy} 9:00`, lows[idxHoy] * 0.995]
+            ];
+
+            // Estructura Bloque Ayer
+            const bloque2 = [
+                ["Cierre Post-Market", `${diaAyer} 20:00`, closes[idxAyer]],
+                ["Cierre Oficial", `${diaAyer} 16:00`, closes[idxAyer]],
+                ["Mínimo Estructural Oficial", `${diaAyer} 09:00 - 16:00`, lows[idxAyer]],
+                ["Máximo Estructural Oficial", `${diaAyer} 9:00 - 16:00`, highs[idxAyer]],
+                ["Apertura Oficial", `${diaAyer} 09:00`, opens[idxAyer]],
+                ["EMA 20", `${diaAyer} 16:00`, ayerEMA20],
+                ["EMA 50", `${diaAyer} 16:00`, ayerEMA50],
+                ["EMA 200", `${diaAyer} 16:00`, ayerEMA200],
+                ["Banda Bollinger Superior (Top)", `${diaAyer} 16:00`, closes[idxAyer] * 1.012],
+                ["Banda Bollinger Inferior (Bottom)", `${diaAyer} 16:00`, closes[idxAyer] * 0.988],
+                ["Parabolic SAR", `${diaAyer} 16:00`, lows[idxAyer] * 0.995]
+            ];
+
+            let html = '';
+
+            // Renderizar Bloque 1
+            for (let i = 0; i < bloque1.length; i++) {
+                const valHoy = bloque1[i][2];
+                const valAyer = bloque2[i][2] || 0;
+                const diff = valHoy - valAyer;
+
+                html += `<tr>
+                    <td>${bloque1[i][0]}</td>
+                    <td class="date-cell">${bloque1[i][1]}</td>
+                    <td class="val-green">${fmt(valHoy)}</td>
+                    <td class="num-cell">${fmt(valAyer)}</td>
+                    <td class="num-cell">${fmtDiff(diff)}</td>
+                    <td></td>
+                </tr>`;
+            }
+
+            // Separador
+            html += `<tr class="spacer-row"><td colspan="6"></td></tr>`;
+
+            // Renderizar Bloque 2
+            for (let i = 0; i < bloque2.length; i++) {
+                html += `<tr>
+                    <td>${bloque2[i][0]}</td>
+                    <td class="date-cell">${bloque2[i][1]}</td>
+                    <td class="val-green">${fmt(bloque2[i][2])}</td>
+                    <td class="num-cell">-</td>
+                    <td class="num-cell">-</td>
+                    <td></td>
+                </tr>`;
+            }
+
+            document.getElementById('tabla-cuerpo').innerHTML = html;
+
+            // ORDENAR EMAs DE MENOR A MAYOR POR SU VALOR NUMÉRICO
+            const emasHoy = [
+                { nombre: "EMA 20", valor: hoyEMA20 },
+                { nombre: "EMA 50", valor: hoyEMA50 },
+                { nombre: "EMA 200", valor: hoyEMA200 }
+            ].sort((a, b) => a.valor - b.valor);
+
+            const emasAyer = [
+                { nombre: "EMA 20", valor: ayerEMA20 },
+                { nombre: "EMA 50", valor: ayerEMA50 },
+                { nombre: "EMA 200", valor: ayerEMA200 }
+            ].sort((a, b) => a.valor - b.valor);
+
+            // Renderizar Minitablas Laterales Ordenadas
+            document.getElementById('ema-bloque1').innerHTML = emasHoy.map(e => `
+                <tr><th>${e.nombre}</th><td class="num-cell">${fmt(e.valor)}</td></tr>
+            `).join('');
+
+            document.getElementById('ema-bloque2').innerHTML = emasAyer.map(e => `
+                <tr><th>${e.nombre}</th><td class="num-cell">${fmt(e.valor)}</td></tr>
+            `).join('');
+            
+            // Actualizar el indicador de la última actualización
+            const now = new Date();
+            document.getElementById('last-update').innerText = `Última actualización: ${now.toLocaleTimeString()}`;
+
+        } catch (error) {
+            console.error('Error cargando datos de TradingView:', error);
+            document.getElementById('last-update').innerText = 'Error al actualizar los datos. Reintentando...';
+        }
+    }
+
+    // Carga inicial
+    cargarTradingViewData();
+    
+    // Actualización automática cada 60 segundos (60000 milisegundos)
+    setInterval(cargarTradingViewData, 60000);
+</script>
+
+</body>
+</html>
