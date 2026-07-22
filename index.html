@@ -28,6 +28,8 @@
         .negative { color: #9C0006; font-weight: bold; }
         .spacer-row { height: 25px; background-color: transparent; }
         .spacer-row td { border: none; }
+        
+        #tv-widget-fallback { width: 100%; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
@@ -45,15 +47,16 @@
 
     <div class="last-update">
         <div id="spinner" class="spinner"></div>
-        <span id="last-update">Cargando datos...</span>
+        <span id="last-update-text">Cargando datos...</span>
     </div>
 
-    <div class="flex-container">
+    <!-- Contenedores de Tablas Custom -->
+    <div class="flex-container" id="custom-tables-container">
         <div class="main-table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th id="th-parametro">Parámetro Operativo (BTC/USDT)</th>
+                        <th id="th-parametro">Parámetro Operativo</th>
                         <th>Fecha / Hora</th>
                         <th>Valor Extraído</th>
                         <th>Dia Previo</th>
@@ -69,15 +72,20 @@
             <table><tbody id="ema-bloque2"></tbody></table>
         </div>
     </div>
+    
+    <!-- Contenedor Fallback Widget de TradingView -->
+    <div id="tv-widget-fallback" class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget" id="tv-widget-inner"></div>
+    </div>
 </div>
 
 <script>
     const paresConfig = {
-        'BTC': { ticker: 'BINANCE:BTCUSDT', label: 'BTC/USDT', screener: 'crypto', fallbackApi: 'binance', symbolBinance: 'BTCUSDT' },
-        'NQ1': { ticker: 'CAPITALCOM:US100', label: 'NQ1/USD', screener: 'america', fallbackApi: 'yahoo', symbolYahoo: 'NQ=F' },
-        'CL1': { ticker: 'TVC:USOIL', label: 'CL1/USD', screener: 'america', fallbackApi: 'yahoo', symbolYahoo: 'CL=F' },
-        'GL1': { ticker: 'TVC:GOLD', label: 'GL1/USD', screener: 'america', fallbackApi: 'yahoo', symbolYahoo: 'GC=F' },
-        'YM1': { ticker: 'CAPITALCOM:US30', label: 'YM1/USD', screener: 'america', fallbackApi: 'yahoo', symbolYahoo: 'YM=F' }
+        'BTC': { ticker: 'BINANCE:BTCUSDT', label: 'BTC/USDT', screener: 'crypto' },
+        'NQ1': { ticker: 'CAPITALCOM:US100', label: 'NQ1/USD', screener: 'america' },
+        'CL1': { ticker: 'CAPITALCOM:OIL_CRUDE', label: 'CL1/USD', screener: 'america' },
+        'GL1': { ticker: 'TVC:GOLD', label: 'GL1/USD', screener: 'america' },
+        'YM1': { ticker: 'CAPITALCOM:US30', label: 'YM1/USD', screener: 'america' }
     };
 
     let parActual = 'BTC';
@@ -88,119 +96,31 @@
             e.target.classList.add('active');
             parActual = e.target.getAttribute('data-par');
             
-            document.getElementById('th-parametro').innerText = `Parámetro Operativo (${paresConfig[parActual].label})`;
-            document.getElementById('last-update').innerText = `Cargando datos de ${paresConfig[parActual].label}...`;
-            document.getElementById('spinner').style.display = 'block';
-            
-            document.getElementById('tabla-cuerpo').innerHTML = '';
-            document.getElementById('ema-bloque1').innerHTML = '';
-            document.getElementById('ema-bloque2').innerHTML = '';
-            
+            limpiarVista();
             cargarTradingViewData();
         });
     });
 
-    // Helper: Calculation functions for fallback data
-    function calculateEMA(data, period) {
-        let result = new Array(data.length).fill(null);
-        if(data.length < period) return result;
-        let k = 2 / (period + 1);
-        let sma = 0;
-        for(let i = 0; i < period; i++) sma += data[i];
-        sma = sma / period;
-        result[period - 1] = sma;
-        for(let i = period; i < data.length; i++) {
-            result[i] = (data[i] * k) + (result[i-1] * (1 - k));
-        }
-        return result;
-    }
-
-    function calculateBB(data, period, multiplier) {
-        let result = new Array(data.length).fill({upper: null, lower: null});
-        if(data.length < period) return result;
-        for(let i = period - 1; i < data.length; i++) {
-            let slice = data.slice(i - period + 1, i + 1);
-            let sma = slice.reduce((a,b) => a+b, 0) / period;
-            let variance = slice.reduce((a,b) => a + Math.pow(b - sma, 2), 0) / period;
-            let stdDev = Math.sqrt(variance);
-            result[i] = { upper: sma + (multiplier * stdDev), lower: sma - (multiplier * stdDev) };
-        }
-        return result;
-    }
-
-    function calculateSAR(highs, lows, closes) {
-        let sar = new Array(closes.length).fill(null);
-        if(closes.length < 2) return sar;
-        let isLong = true;
-        let afStep = 0.02, afMax = 0.2;
-        let ep = highs[0];
-        sar[0] = lows[0];
-        let af = afStep;
+    function limpiarVista() {
+        const config = paresConfig[parActual];
+        document.getElementById('th-parametro').innerText = `Parámetro Operativo (${config.label})`;
+        document.getElementById('last-update-text').innerText = `Cargando datos de ${config.label}...`;
+        document.getElementById('spinner').style.display = 'block';
         
-        for (let i = 1; i < closes.length; i++) {
-            let prevSar = sar[i-1];
-            if (isLong) {
-                let nextSar = prevSar + af * (ep - prevSar);
-                nextSar = Math.min(nextSar, lows[i-1], i>1 ? lows[i-2] : lows[i-1]);
-                sar[i] = nextSar;
-                if (lows[i] < nextSar) {
-                    isLong = false;
-                    sar[i] = ep;
-                    ep = lows[i];
-                    af = afStep;
-                } else {
-                    if (highs[i] > ep) {
-                        ep = highs[i];
-                        af = Math.min(af + afStep, afMax);
-                    }
-                }
-            } else {
-                let nextSar = prevSar + af * (ep - prevSar);
-                nextSar = Math.max(nextSar, highs[i-1], i>1 ? highs[i-2] : highs[i-1]);
-                sar[i] = nextSar;
-                if (highs[i] > nextSar) {
-                    isLong = true;
-                    sar[i] = ep;
-                    ep = highs[i];
-                    af = afStep;
-                } else {
-                    if (lows[i] < ep) {
-                        ep = lows[i];
-                        af = Math.min(af + afStep, afMax);
-                    }
-                }
-            }
-        }
-        return sar;
-    }
-
-    function processOHLCAndRender(ohlc, config) {
-        if(ohlc.length < 2) throw new Error("Not enough data from fallback");
-        const closes = ohlc.map(d => d.close);
-        const highs = ohlc.map(d => d.high);
-        const lows = ohlc.map(d => d.low);
-        const opens = ohlc.map(d => d.open);
-
-        const ema20 = calculateEMA(closes, 20);
-        const ema50 = calculateEMA(closes, 50);
-        const ema200 = calculateEMA(closes, 200);
-        const bb = calculateBB(closes, 20, 2);
-        const sar = calculateSAR(highs, lows, closes);
-
-        const idxHoy = closes.length - 1;
-        const idxAyer = Math.max(0, closes.length - 25); // Approx 24 hours ago in 1H timeframe
-
-        const d = [
-            opens[idxHoy], highs[idxHoy], lows[idxHoy], closes[idxHoy],
-            ema20[idxHoy], ema50[idxHoy], ema200[idxHoy], bb[idxHoy].upper, bb[idxHoy].lower, sar[idxHoy],
-            opens[idxAyer], highs[idxAyer], lows[idxAyer], closes[idxAyer],
-            ema20[idxAyer], ema50[idxAyer], ema200[idxAyer], bb[idxAyer].upper, bb[idxAyer].lower, sar[idxAyer]
-        ];
-
-        renderizarTabla(d, config);
+        // Limpiar tabla custom
+        document.getElementById('tabla-cuerpo').innerHTML = '';
+        document.getElementById('ema-bloque1').innerHTML = '';
+        document.getElementById('ema-bloque2').innerHTML = '';
+        
+        // Limpiar widget
+        document.getElementById('tv-widget-inner').innerHTML = '';
     }
 
     function renderizarTabla(d, config) {
+        // Mostrar tablas custom, ocultar widget fallback
+        document.getElementById('custom-tables-container').style.display = 'flex';
+        document.getElementById('tv-widget-fallback').style.display = 'none';
+
         const hoyOpen = d[0] || 0; const hoyHigh = d[1] || 0; const hoyLow = d[2] || 0; const hoyClose = d[3] || 0;
         const hoyEMA20 = d[4] || 0; const hoyEMA50 = d[5] || 0; const hoyEMA200 = d[6] || 0;
         const hoyBBup = d[7] || 0; const hoyBBlow = d[8] || 0; const hoySAR = d[9] || 0;
@@ -292,17 +212,51 @@
             <tr><th>${e.nombre}</th><td class="num-cell">${fmt(e.valor)}</td></tr>
         `).join('');
         
+        finalizarCarga(config.label);
+    }
+
+    function inyectarWidgetTradingView(config) {
+        console.log("Activando Fallback Widget TradingView para", config.ticker);
+        
+        // Ocultar tablas custom y mostrar contenedor de widget
+        document.getElementById('custom-tables-container').style.display = 'none';
+        const widgetContainer = document.getElementById('tv-widget-fallback');
+        widgetContainer.style.display = 'block';
+        
+        const innerContainer = document.getElementById('tv-widget-inner');
+        innerContainer.innerHTML = '';
+        
+        // Crear e inyectar el script del widget técnico
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
+        script.async = true;
+        
+        script.innerHTML = JSON.stringify({
+            "interval": "1h",
+            "width": "100%",
+            "isTransparent": false,
+            "height": "500",
+            "symbol": config.ticker,
+            "showIntervalTabs": true,
+            "displayMode": "multiple",
+            "locale": "es",
+            "colorTheme": "light"
+        });
+        
+        innerContainer.appendChild(script);
+        finalizarCarga(`${config.label} (Modo Widget TV)`);
+    }
+
+    function finalizarCarga(labelText) {
         const now = new Date();
         document.getElementById('spinner').style.display = 'none';
-        document.getElementById('last-update').innerText = `Última actualización: ${now.toLocaleTimeString()} - Par: ${config.label}`;
+        document.getElementById('last-update-text').innerText = `Última actualización: ${now.toLocaleTimeString()} - Par: ${labelText}`;
     }
 
     async function cargarTradingViewData() {
         const config = paresConfig[parActual];
-        let successTV = false;
-
-        document.getElementById('spinner').style.display = 'block';
-
+        
         try {
             const queryBody = {
                 "symbols": { "tickers": [config.ticker] },
@@ -311,66 +265,43 @@
                     "open[1]", "high[1]", "low[1]", "close[1]", "EMA20[1]", "EMA50[1]", "EMA200[1]", "BB.upper[1]", "BB.lower[1]", "P.SAR[1]"
                 ]
             };
+            
             const tvRes = await fetch(`https://scanner.tradingview.com/${config.screener}/scan`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify(queryBody)
             });
+            
             if (tvRes.ok) {
                 const tvData = await tvRes.json();
                 if (tvData.data && tvData.data.length > 0 && tvData.data[0].d[0] !== null) {
                     renderizarTabla(tvData.data[0].d, config);
-                    successTV = true;
+                    return; // Éxito con HTTP directo
                 }
             }
+            
+            // Si llega aquí, la respuesta fue HTTP OK pero vacía (bloqueo/CORS/symbol no encontrado en scanner) o tvRes no ok
+            throw new Error("Respuesta del scanner vacía o bloqueada");
+            
         } catch (error) {
-            console.warn('TV Scanner failed, trying fallback...', error);
-        }
-
-        if (!successTV) {
-            try {
-                if (config.fallbackApi === 'binance') {
-                    const binanceRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${config.symbolBinance}&interval=1h&limit=250`);
-                    const binanceData = await binanceRes.json();
-                    const ohlc = binanceData.map(d => ({
-                        open: parseFloat(d[1]), high: parseFloat(d[2]), low: parseFloat(d[3]), close: parseFloat(d[4])
-                    }));
-                    processOHLCAndRender(ohlc, config);
-                } else if (config.fallbackApi === 'yahoo') {
-                    // Use standard allorigins proxy to bypass CORS for Yahoo Finance
-                    const yfUrl = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${config.symbolYahoo}?interval=1h&range=14d`);
-                    const yfRes = await fetch(`https://api.allorigins.win/raw?url=${yfUrl}`);
-                    const yfData = await yfRes.json();
-                    const res = yfData.contents ? JSON.parse(yfData.contents).chart.result[0] : yfData.chart.result[0];
-                    const ohlc = [];
-                    for(let i = 0; i < res.indicators.quote[0].close.length; i++){
-                        if (res.indicators.quote[0].close[i] !== null && res.indicators.quote[0].close[i] !== undefined) {
-                            ohlc.push({
-                                open: res.indicators.quote[0].open[i],
-                                high: res.indicators.quote[0].high[i],
-                                low: res.indicators.quote[0].low[i],
-                                close: res.indicators.quote[0].close[i]
-                            });
-                        }
-                    }
-                    processOHLCAndRender(ohlc, config);
-                }
-            } catch (error) {
-                console.error('Fallback failed:', error);
-                document.getElementById('spinner').style.display = 'none';
-                document.getElementById('last-update').innerText = 'Error al actualizar los datos.';
-                document.getElementById('tabla-cuerpo').innerHTML = '';
-                document.getElementById('ema-bloque1').innerHTML = '';
-                document.getElementById('ema-bloque2').innerHTML = '';
-            }
+            console.warn('TV Scanner Fetch falló, conmutando a Widget TV directo:', error);
+            // Fallback: Inyectar widget de TradingView 100% nativo
+            inyectarWidgetTradingView(config);
         }
     }
 
     // Carga inicial
+    limpiarVista();
     cargarTradingViewData();
     
     // Actualización automática cada 60 segundos
-    setInterval(cargarTradingViewData, 60000);
+    setInterval(() => {
+        // Solo recargar la tabla custom si está en uso. Si el widget está activo, este se actualiza solo en tiempo real.
+        if (document.getElementById('tv-widget-fallback').style.display !== 'block') {
+            limpiarVista();
+            cargarTradingViewData();
+        }
+    }, 60000);
 </script>
 
 </body>
