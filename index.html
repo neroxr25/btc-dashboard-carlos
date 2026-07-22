@@ -129,11 +129,11 @@
     
     <!-- Botones de Pares -->
     <div class="menu-pares" id="menu-pares">
-        <button class="btn-par active" data-par="BTC">BTC/USDT (TradingView)</button>
-        <button class="btn-par" data-par="NQ1">NQ1/USD (US100)</button>
-        <button class="btn-par" data-par="CL1">CL1/USD (USOIL)</button>
-        <button class="btn-par" data-par="GL1">GL1/USD (GOLD)</button>
-        <button class="btn-par" data-par="YM1">YM1/USD (US30)</button>
+        <button class="btn-par active" data-par="BTC">BTC/USDT</button>
+        <button class="btn-par" data-par="NQ1">NQ1/USD</button>
+        <button class="btn-par" data-par="CL1">CL1/USD</button>
+        <button class="btn-par" data-par="GL1">GL1/USD</button>
+        <button class="btn-par" data-par="YM1">YM1/USD</button>
     </div>
 
     <div id="last-update" class="last-update">Actualizando datos...</div>
@@ -173,10 +173,10 @@
 <script>
     const paresConfig = {
         'BTC': { ticker: 'BINANCE:BTCUSDT', label: 'BTC/USDT' },
-        'NQ1': { ticker: 'CME_MINI:NQ1!', label: 'NQ1/USD' },
-        'CL1': { ticker: 'NYMEX:CL1!', label: 'CL1/USD' },
-        'GL1': { ticker: 'COMEX:GC1!', label: 'GL1/USD' },
-        'YM1': { ticker: 'CBOT_MINI:YM1!', label: 'YM1/USD' }
+        'NQ1': { ticker: 'US100', label: 'NQ1/USD' },
+        'CL1': { ticker: 'USOIL', label: 'CL1/USD' },
+        'GL1': { ticker: 'GOLD', label: 'GL1/USD' },
+        'YM1': { ticker: 'US30', label: 'YM1/USD' }
     };
 
     let parActual = 'BTC';
